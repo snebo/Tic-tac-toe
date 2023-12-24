@@ -7,7 +7,8 @@ class TicTacToe
     @p1 = pl1
     @p2 = pl2
     @cell = Hash.new{ 0 }
-    @play_game = false
+    @play_game = true #change this back to false
+    @turn = false # false for pl1 and true for pl2
   end
 
   def greeting
@@ -16,38 +17,55 @@ class TicTacToe
     puts SPACE
 
     while not @play_game
-    puts "Play game(y,n)?"
+    puts 'Play game(y,n)?'
     p_res = gets.chomp
     p_res == "y" || p_res == "n" ? (p_res == "y"? @play_game = true : return) 
-                                  : puts("invalid input")
+                                  : puts('invalid input')
     end
     self.play
   end
 
   def play
-    self.draw_board
+    while @play_game
+      self.draw_board(@p1,@p2)
+      @turn ? self.ch_turn(@p1) : self.ch_turn(@p2)
+    end
   end
 
   private
 
-  def draw_board
-    # iterate through 3 rows
-    # have 9 points (cells) to check
+  def ch_turn(pl)
+    print ("#{pl.name} choose an number to play -> ")
+    choice = gets.chomp
+    # add a check for valid entry
+    pl.store_turns(choice)
+    @turn = not(@turn)
+  end
+
+  def draw_board(p1_arr =[], p2_arr = [])
     9.times { |i| @cell["cell#{i + 1}"] = i + 1 }
     n_gap = ' ' * 2
     gap = '-----'
     num = 1
     system("clear") || system("cls")
+ 
     puts SPACE
     puts "=============== #{@p1.name}__vs__#{@p2.name} ============\n\n"
-
+    
     # draw the board
     6.times do |i|
-      if i%2 == 0 
+      if i.even?
         3.times do |i|
-          print "#{n_gap}#{num}#{n_gap}"
-          num +=1
-          i<2 ? print('|') : puts('')
+          if p1_arr.spots.include?(num.to_s)
+            # change X to #{p1_arr.sym}
+            print "#{n_gap}X#{n_gap}"
+          elsif p2_arr.spots.include?(num.to_s)
+            print "#{n_gap}O#{n_gap}"
+          else
+            print "#{n_gap}#{num}#{n_gap}"
+          end
+          num += 1
+          i < 2 ? print('|') : puts('')
         end
       else
         print "#{gap}|#{gap}|#{gap}\n"
@@ -55,6 +73,7 @@ class TicTacToe
     end
     puts "\n"
   end
+  num = 1
 end
 
 # Player: collect and manage player information
@@ -68,6 +87,7 @@ class Player
     @sym
     @no # player number
     @ply_score = 0
+    @spots = []
     @@players += 1
   end
 
@@ -76,11 +96,20 @@ class Player
   end
 
   def show_info
-    puts "Player: #{@no}\nName: #{@name}\nSymbol: #{@sym}"
+    p "Player: #{@no}\nName: #{@name}\nSymbol: #{@sym}\n Score: #{@ply_score}"
   end
 
   def add_score
     self.ply_score += 1
+  end
+
+  def store_turns(cell)
+    @spots.push(cell)
+    puts @spots
+  end
+
+  def spots
+    @spots
   end
 
   private
