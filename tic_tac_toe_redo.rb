@@ -49,6 +49,26 @@ class Game
       end
     end
     puts "Do you want to play again? (y,n)"
+    choice = gets.chomp
+    until choice.downcase == 'y' || choice.downcase == 'n'
+      puts "Do you want to play again? (y,n)"
+      choice = gets.chomp
+    end
+    if choice.downcase == 'y' 
+      self.reset(p1,p2)
+      play(p1,p2)
+    else 
+      return
+    end
+  end
+
+  def reset (p1, p2)
+    @game_end = false
+    @turn = true
+    @avl_p = []
+
+    p1.reset
+    p2.reset
   end
 
   def ch_turn(p)
@@ -99,6 +119,10 @@ class Player
 
   def add_score
     @pl_score += 1
+  end
+
+  def reset
+    @pl_cells = []
   end
   
   def spots
