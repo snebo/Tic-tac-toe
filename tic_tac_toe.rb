@@ -5,12 +5,12 @@ class Game
     @avl_p = []
   end
 
-  def draw_board(p1,p2)
+  def draw_board(p1, p2)
     system('clear') || system('cls') # clear screen on each draw
     space = '  '
     line = '-----'
     num = 1
-    #place scores here
+    # place scores here
     puts '=' * 35
     puts "#{line}#{space}#{p1.name}: #{p1.pl_score} VS #{p1.name}: #{p2.pl_score}#{space}#{line}"
     puts '=' * 35
@@ -39,11 +39,11 @@ class Game
   def play(p1, p2)
     turns = 0
     self.draw_board(p1, p2)
-    while not @game_end
+    until @game_end
       if turns < 9
         @turn ? self.ch_turn(p1) : self.ch_turn(p2)
-        !@turn ? self.has_won(p1) : self.has_won(p2)
-        #stop from drawing the board on game over
+        !@turn ? self.won?(p1) : self.won?(p2)
+        # stop from drawing the board on game over
         @game_end ? nil : self.draw_board(p1, p2)
 
         @turn = not(@turn)
@@ -54,10 +54,10 @@ class Game
         puts 'There are no avaliable turns left... game over'
       end
     end
-    puts "Do you want to play again? (y,n)"
+    puts 'Do you want to play again? (y,n)'
     choice = gets.chomp
     until choice.downcase == 'y' || choice.downcase == 'n'
-      puts "Do you want to play again? (y,n)"
+      puts 'Do you want to play again? (y,n)'
       choice = gets.chomp
     end
     if choice.downcase == 'y'
@@ -66,7 +66,7 @@ class Game
     end
   end
 
-  def reset (p1, p2)
+  def reset(p1, p2)
     @game_end = false
     @turn = true
     @avl_p = []
@@ -84,18 +84,13 @@ class Game
     end
     p.store_turn(choice.to_i)
     @avl_p.append(choice.to_i)
-    # self.has_won(p)
   end
 
-  def has_won(pl)
+  def won?(pl)
     win = false
     win_spots = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 5, 9], [3, 5, 8],
                  [1, 4, 7], [2, 5, 8], [3, 6, 9]]
-
-    win_spots.each do |i|
-      i.all? {|j| pl.spots.include?(j)} ? win = true : nil
-      # pl.spots.sort.eql?(i) ? win = true : nil
-    end
+    win_spots.each { |i| i.all? { |j| pl.spots.include?(j) } ? win = true : nil }
     if win
       puts "#{pl.name.capitalize} Won!..."
       pl.add_score
@@ -104,6 +99,7 @@ class Game
   end
 end
 
+# Player: creates and store information of players
 class Player
   @@players = 0
   attr_accessor :name, :sym, :pl_score
@@ -138,19 +134,18 @@ class Player
   end
 end
 
-puts "Hello, welcome to GUI Tic Tac Toe @snebo"
-print "player 1, enter your name -> "
+puts 'Hello, welcome to GUI Tic Tac Toe @snebo'
+print 'player 1, enter your name -> '
 p_name = gets.chomp
-print "Enter your symbol (X, O, whatever..) -> "
+print 'Enter your symbol (X, O, whatever..) -> '
 p_sym = gets.chomp.chr.upcase
 pl1 = Player.new(p_name, p_sym)
 
 print "\nplayer 2, enter your name -> "
 p_name = gets.chomp
-print "Enter your symbol (X, O, whatever..) -> "
+print 'Enter your symbol (X, O, whatever..) -> '
 p_sym = gets.chomp.chr.upcase
 pl2 = Player.new(p_name, p_sym)
 
 TTT = Game.new
 TTT.play(pl1, pl2)
-
