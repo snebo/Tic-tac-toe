@@ -138,7 +138,19 @@ class Player
   end
 end
 
-play1 = Player.new('Thor', 'X')
-play2 = Player.new('Loki', 'O')
-test = Game.new
-test.play(play1, play2)
+puts "Hello, welcome to GUI Tic Tac Toe @snebo"
+print "player 1, enter your name -> "
+p_name = gets.chomp
+print "Enter your symbol (X, O, whatever..) -> "
+p_sym = gets.chomp.chr.upcase
+pl1 = Player.new(p_name, p_sym)
+
+print "\nplayer 2, enter your name -> "
+p_name = gets.chomp
+print "Enter your symbol (X, O, whatever..) -> "
+p_sym = gets.chomp.chr.upcase
+pl2 = Player.new(p_name, p_sym)
+
+TTT = Game.new
+TTT.play(pl1, pl2)
+
