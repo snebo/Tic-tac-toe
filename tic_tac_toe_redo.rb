@@ -10,6 +10,12 @@ class Game
     space = '  '
     line = '-----'
     num = 1
+    #place scores here
+    puts '=' * 35
+    puts "#{line}#{space}#{p1.name}: #{p1.pl_score} VS #{p1.name}: #{p2.pl_score}#{space}#{line}"
+    puts '=' * 35
+    puts "\n"
+
     6.times do |i|
       if i.even?
         3.times do |j|
@@ -54,11 +60,9 @@ class Game
       puts "Do you want to play again? (y,n)"
       choice = gets.chomp
     end
-    if choice.downcase == 'y' 
-      self.reset(p1,p2)
-      play(p1,p2)
-    else 
-      return
+    if choice.downcase == 'y'
+      self.reset(p1, p2)
+      play(p1, p2)
     end
   end
 
@@ -102,7 +106,7 @@ end
 
 class Player
   @@players = 0
-  attr_accessor :name, :sym
+  attr_accessor :name, :sym, :pl_score
 
   def initialize(name, sym)
     @@players += 1
@@ -124,7 +128,7 @@ class Player
   def reset
     @pl_cells = []
   end
-  
+
   def spots
     @pl_cells
   end
