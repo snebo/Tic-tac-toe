@@ -1,142 +1,144 @@
-# frozen_string_literal = true
-# TicTacToe: contains game files
-SPACE = '=' * 50
-
-class TicTacToe
-  def initialize(pl1, pl2)
-    @p1 = pl1
-    @p2 = pl2
-    @cell = Hash.new{ 0 }
-    @play_game = true #change this back to false
-    @turn = false # false for pl1 and true for pl2
+class Game
+  def initialize
+    @game_end = false
+    @turn = true
+    @avl_p = []
   end
 
-  def greeting
-    2.times { puts SPACE }
-    puts 'Welcome to the GUI Tic Tac Toe by @Stefano'
-    puts SPACE
-
-    while not @play_game
-    puts 'Play game(y,n)?'
-    p_res = gets.chomp
-    p_res == "y" || p_res == "n" ? (p_res == "y"? @play_game = true : return) 
-                                  : puts('invalid input')
-    end
-    self.play
-  end
-
-  def play
-    while @play_game
-      self.draw_board(@p1,@p2)
-      @turn ? self.ch_turn(@p1) : self.ch_turn(@p2)
-    end
-  end
-
-  private
-
-  def ch_turn(pl)
-    print ("#{pl.name} choose an number to play -> ")
-    choice = gets.chomp
-    # add a check for valid entry
-    pl.store_turns(choice)
-    @turn = not(@turn)
-  end
-
-  def draw_board(p1_arr =[], p2_arr = [])
-    9.times { |i| @cell["cell#{i + 1}"] = i + 1 }
-    n_gap = ' ' * 2
-    gap = '-----'
+  def draw_board(p1,p2)
+    system('clear') || system('cls') # clear screen on each draw
+    space = '  '
+    line = '-----'
     num = 1
-    system("clear") || system("cls")
- 
-    puts SPACE
-    puts "=============== #{@p1.name}__vs__#{@p2.name} ============\n\n"
-    
-    # draw the board
+    #place scores here
+    puts '=' * 35
+    puts "#{line}#{space}#{p1.name}: #{p1.pl_score} VS #{p1.name}: #{p2.pl_score}#{space}#{line}"
+    puts '=' * 35
+    puts "\n"
+
     6.times do |i|
       if i.even?
-        3.times do |i|
-          if p1_arr.spots.include?(num.to_s)
-            # change X to #{p1_arr.sym}
-            print "#{n_gap}X#{n_gap}"
-          elsif p2_arr.spots.include?(num.to_s)
-            print "#{n_gap}O#{n_gap}"
+        3.times do |j|
+          # Replace with p symbols
+          if p1.spots.include?(num)
+            print "#{space}#{p1.sym}#{space}"
+          elsif p2.spots.include?(num)
+            print "#{space}#{p2.sym}#{space}"
           else
-            print "#{n_gap}#{num}#{n_gap}"
+            print "#{space}#{num}#{space}"
           end
           num += 1
-          i < 2 ? print('|') : puts('')
+          j < 2 ? print('|') : puts('')
         end
       else
-        print "#{gap}|#{gap}|#{gap}\n"
+        puts "#{line}|#{line}|#{line}"
       end
     end
-    puts "\n"
   end
-  num = 1
+
+  def play(p1, p2)
+    turns = 0
+    self.draw_board(p1, p2)
+    while not @game_end
+      if turns < 9
+        @turn ? self.ch_turn(p1) : self.ch_turn(p2)
+        !@turn ? self.has_won(p1) : self.has_won(p2)
+        #stop from drawing the board on game over
+        @game_end ? nil : self.draw_board(p1, p2)
+
+        @turn = not(@turn)
+        turns += 1
+
+      else
+        @game_end = true
+        puts 'There are no avaliable turns left... game over'
+      end
+    end
+    puts "Do you want to play again? (y,n)"
+    choice = gets.chomp
+    until choice.downcase == 'y' || choice.downcase == 'n'
+      puts "Do you want to play again? (y,n)"
+      choice = gets.chomp
+    end
+    if choice.downcase == 'y'
+      self.reset(p1, p2)
+      play(p1, p2)
+    end
+  end
+
+  def reset (p1, p2)
+    @game_end = false
+    @turn = true
+    @avl_p = []
+
+    p1.reset
+    p2.reset
+  end
+
+  def ch_turn(p)
+    print "#{p.name.capitalize} choose a number to play -> "
+    choice = gets.chomp
+    until Array(1..9).include?(choice.to_i) && !@avl_p.include?(choice.to_i)
+      print "#{p.name.capitalize} enter a valid no -> "
+      choice = gets.chomp
+    end
+    p.store_turn(choice.to_i)
+    @avl_p.append(choice.to_i)
+    # self.has_won(p)
+  end
+
+  def has_won(pl)
+    win = false
+    win_spots = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 5, 9], [3, 5, 8],
+                 [1, 4, 7], [2, 5, 8], [3, 6, 9]]
+
+    win_spots.each do |i|
+      i.all? {|j| pl.spots.include?(j)} ? win = true : nil
+      # pl.spots.sort.eql?(i) ? win = true : nil
+    end
+    if win
+      puts "#{pl.name.capitalize} Won!..."
+      pl.add_score
+      @game_end = true
+    end
+  end
 end
 
-# Player: collect and manage player information
 class Player
-  attr_accessor :name, :sym
-
   @@players = 0
+  attr_accessor :name, :sym, :pl_score
 
-  def initialize(name)
-    @name = name
-    @sym
-    @no # player number
-    @ply_score = 0
-    @spots = []
+  def initialize(name, sym)
     @@players += 1
+    @name = name
+    @sym = sym
+    @pl_no = @@players
+    @pl_score = 0
+    @pl_cells = []
   end
 
-  def set_info
-    self.player_info
-  end
-
-  def show_info
-    p "Player: #{@no}\nName: #{@name}\nSymbol: #{@sym}\n Score: #{@ply_score}"
+  def store_turn(spot)
+    @pl_cells.push(spot)
   end
 
   def add_score
-    self.ply_score += 1
+    @pl_score += 1
   end
 
-  def store_turns(cell)
-    @spots.push(cell)
-    puts @spots
+  def reset
+    @pl_cells = []
   end
 
   def spots
-    @spots
+    @pl_cells
   end
 
-  private
-
-  def player_info
-    puts(SPACE)
-    @no = @@players
-    print "Player #{@@players} \nEnter name -> "
-    self.name = gets.chomp
-    print 'Enter you symbol -> '
-    self.sym = gets.chomp
-    puts(SPACE)
+  def show_info
+    puts "Player #{@pl_no}: #{@name}\nSymbol: #{@sym}\nScore: #{@pl_score}"
   end
 end
 
-# set up players and their symbol
-# ply1 = Player.new
-# ply1.set_info
-
-# ply2 = Player.new
-# ply2.set_info
-
-# # initialize game
-# ttt = TicTacToe.new(ply1, ply2)
-# ttt.greeting
-
-p1 = Player.new("Thor")
-p2 = Player.new("Loki")
-ttt = TicTacToe.new(p1,p2)
-ttt.play
+play1 = Player.new('Thor', 'X')
+play2 = Player.new('Loki', 'O')
+test = Game.new
+test.play(play1, play2)
