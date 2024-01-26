@@ -42,11 +42,11 @@ class Game
     until @game_end
       if turns < 9
         @turn ? self.ch_turn(p1) : self.ch_turn(p2)
-        !@turn ? self.won?(p1) : self.won?(p2)
+        @game_end = !@turn ? won?(p1) : won?(p2)
         # stop from drawing the board on game over
         @game_end ? nil : self.draw_board(p1, p2)
 
-        @turn = not(@turn)
+        @turn = !@turn
         turns += 1
 
       else
@@ -92,10 +92,14 @@ class Game
                  [1, 4, 7], [2, 5, 8], [3, 6, 9]]
     win_spots.each { |i| i.all? { |j| pl.spots.include?(j) } ? win = true : nil }
     if win
-      puts "#{pl.name.capitalize} Won!..."
+      win_message
       pl.add_score
-      @game_end = true
     end
+    win
+  end
+
+  def win_message
+    puts "#{pl.name.capitalize} Won!..."
   end
 end
 
@@ -134,18 +138,18 @@ class Player
   end
 end
 
-puts 'Hello, welcome to GUI Tic Tac Toe @snebo'
-print 'player 1, enter your name -> '
-p_name = gets.chomp
-print 'Enter your symbol (X, O, whatever..) -> '
-p_sym = gets.chomp.chr.upcase
-pl1 = Player.new(p_name, p_sym)
+# puts 'Hello, welcome to GUI Tic Tac Toe @snebo'
+# print 'player 1, enter your name -> '
+# p_name = gets.chomp
+# print 'Enter your symbol (X, O, whatever..) -> '
+# p_sym = gets.chomp.chr.upcase
+# pl1 = Player.new(p_name, p_sym)
 
-print "\nplayer 2, enter your name -> "
-p_name = gets.chomp
-print 'Enter your symbol (X, O, whatever..) -> '
-p_sym = gets.chomp.chr.upcase
-pl2 = Player.new(p_name, p_sym)
+# print "\nplayer 2, enter your name -> "
+# p_name = gets.chomp
+# print 'Enter your symbol (X, O, whatever..) -> '
+# p_sym = gets.chomp.chr.upcase
+# pl2 = Player.new(p_name, p_sym)
 
-TTT = Game.new
-TTT.play(pl1, pl2)
+# TTT = Game.new
+# TTT.play(pl1, pl2)
